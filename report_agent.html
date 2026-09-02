@@ -933,7 +933,7 @@
       body.classList.toggle("streaming", streaming);
       $("#writingStatus").classList.toggle("active", streaming);
       $("#editButton").disabled = state.running || !state.document;
-      updateSaveButton();
+      updateSaveButton(); 
     }
 
     function inlineTextOf(node) {
