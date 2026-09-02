@@ -1,0 +1,1514 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ReportAI로 시작하는 공직 실무 마스터: 저연차 공무원을 위한 보고서 역량 강화</title>
+  <style>
+    :root {
+      --ink: #18201d;
+      --muted: #69736e;
+      --line: #dce2de;
+      --paper: #ffffff;
+      --canvas: #f3f5f2;
+      --green: #176b50;
+      --green-soft: #e8f2ed;
+      --amber: #a96019;
+      --amber-soft: #fff2df;
+      --red: #a34242;
+      --shadow: 0 18px 50px rgba(31, 45, 39, .08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 8% 0%, rgba(23, 107, 80, .09), transparent 28rem),
+        var(--canvas);
+      font-family: Pretendard, "Noto Sans KR", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.65;
+    }
+
+    button, input, textarea, select { font: inherit; }
+
+    .shell { width: 100%; margin: 0; padding: 32px; }
+
+    header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 28px;
+    }
+
+    .eyebrow {
+      margin: 0 0 7px;
+      color: var(--green);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+    }
+
+    header h1 { max-width: 1100px; margin: 0; font-family: Georgia, "Noto Serif KR", serif; font-size: clamp(30px, 4vw, 48px); }
+    header p { margin: 7px 0 0; color: var(--muted); }
+    .project-summary { font-size: 15px; }
+
+    .connection {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .dot { width: 9px; height: 9px; border-radius: 50%; background: #a6aea9; box-shadow: 0 0 0 4px #e4e8e5; }
+    .dot.ok { background: #2d9a70; box-shadow: 0 0 0 4px #dcefe7; }
+    .dot.busy { background: #d78a32; box-shadow: 0 0 0 4px #faead6; animation: pulse 1.1s infinite; }
+    .dot.error { background: #c45757; box-shadow: 0 0 0 4px #f4dddd; }
+    @keyframes pulse { 50% { opacity: .4; } }
+
+    .card, .request-box {
+      background: rgba(255, 255, 255, .92);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .request-box {
+      width: 100%;
+      min-width: 0;
+      overflow: hidden;
+    }
+    .request-box .request-body { padding: 18px 20px 20px; }
+    .request-box .request-head {
+      display: flex;
+      min-height: 73px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--line);
+    }
+    .request-box h2 {
+      margin: 0;
+      font-size: 16px;
+    }
+    .config-card { display: block; }
+    .config-body { padding: 18px 20px 20px; }
+    .settings { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    .prompt-settings { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); }
+    #promptEditor { min-height: 260px; height: 320px; font: 12px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .prompt-actions { display: flex; justify-content: flex-end; margin-top: 10px; }
+    label { display: block; margin-bottom: 6px; color: var(--muted); font-size: 12px; font-weight: 700; }
+
+    input, textarea, select {
+      width: 100%;
+      color: var(--ink);
+      background: #fbfcfb;
+      border: 1px solid #ccd4cf;
+      border-radius: 10px;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+
+    input, select { height: 44px; padding: 0 12px; }
+    textarea { min-height: 84px; height: 84px; padding: 13px 14px; resize: vertical; }
+    input:focus, textarea:focus, select:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(23, 107, 80, .1); }
+
+    .actions { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 14px; }
+    .hint { color: var(--muted); font-size: 12px; }
+    .button-row { display: flex; gap: 9px; }
+
+    button {
+      min-height: 42px;
+      padding: 0 17px;
+      border: 0;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 800;
+      transition: transform .15s, opacity .15s, background .15s;
+    }
+
+    button:hover:not(:disabled) { transform: translateY(-1px); }
+    button:disabled { cursor: not-allowed; opacity: .45; }
+    .primary { color: #fff; background: var(--green); }
+    .secondary { color: var(--ink); background: #e7ebe8; }
+    .danger { color: var(--red); background: #f6e8e8; }
+    .account-controls { display: flex; flex: 0 0 auto; flex-wrap: nowrap; align-items: center; gap: 10px; white-space: nowrap; }
+    .account-name { overflow: hidden; color: var(--muted); font-size: 13px; font-weight: 700; text-overflow: ellipsis; }
+    .logout-button { min-height: 32px; flex: 0 0 auto; padding: 0 10px; font-size: 12px; white-space: nowrap; }
+    .login-overlay { position: fixed; z-index: 10; inset: 0; display: grid; place-items: center; padding: 24px; background: rgba(236, 241, 237, .9); backdrop-filter: blur(6px); }
+    .login-overlay[hidden] { display: none; }
+    .login-panel { width: min(100%, 380px); padding: 30px; background: #fff; border: 1px solid #cad6cf; border-radius: 8px; box-shadow: 0 24px 70px rgba(24, 32, 29, .18); }
+    .login-panel h1 { margin: 0; font: 700 27px/1.3 Georgia, "Noto Serif KR", serif; }
+    .login-panel p { margin: 8px 0 25px; color: var(--muted); font-size: 13px; }
+    .login-panel label { margin-top: 15px; }
+    .login-panel button { width: 100%; margin-top: 22px; }
+    .login-error { min-height: 20px; margin: 10px 0 0; color: var(--red); font-size: 12px; }
+
+    .workspace { display: grid; grid-template-columns: minmax(330px, .8fr) minmax(500px, 1.4fr); gap: 22px; align-items: start; }
+    .left-column { display: grid; gap: 22px; }
+    .card-head { display: flex; min-height: 73px; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 20px; border-bottom: 1px solid var(--line); }
+    .card-head h2 { margin: 0; font-size: 16px; }
+    .badge { padding: 4px 9px; color: var(--green); background: var(--green-soft); border-radius: 999px; font-size: 11px; font-weight: 800; }
+
+    #timeline { max-height: 320px; overflow: auto; padding: 18px; }
+    .empty { padding: 60px 20px; color: var(--muted); text-align: center; font-size: 14px; }
+    .event { position: relative; margin: 0 0 14px 12px; padding: 0 0 14px 22px; border-left: 1px solid #cfdbd4; }
+    .event:last-child { border-left-color: transparent; }
+    .event::before { content: ""; position: absolute; top: 3px; left: -5px; width: 9px; height: 9px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 4px var(--green-soft); }
+    .event.writer::before { background: var(--amber); box-shadow: 0 0 0 4px var(--amber-soft); }
+    .event-meta { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 5px; }
+    .agent-name { font-size: 13px; font-weight: 850; }
+    .event.writer .agent-name { color: var(--amber); }
+    .event.supervisor .agent-name { color: var(--green); }
+    .time { color: #929a95; font-size: 11px; }
+    .stage { margin: 0 0 7px; color: var(--muted); font-size: 12px; }
+    .stream-text { margin: 0; padding: 10px 11px; max-height: 210px; overflow: auto; color: #3e4742; background: #f5f7f5; border-radius: 8px; font: 12px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .streaming .stream-text::after { content: "▋"; color: var(--green); animation: pulse .7s infinite; }
+    .thought { margin: 0; padding: 10px 11px; color: #3e4742; background: #f5f7f5; border-radius: 8px; font-size: 12px; line-height: 1.6; }
+    .thought-pending { color: var(--muted); font-style: italic; }
+    .streaming .thought p:last-child::after, .streaming .thought li:last-child::after { content: "▋"; margin-left: 3px; color: var(--green); animation: pulse .7s infinite; }
+    .thought-line { margin: 0 0 5px; }
+    .thought-line:last-child { margin-bottom: 0; }
+    .thought-label { margin: 8px 0 3px; color: var(--ink); font-weight: 800; }
+    .thought-label:first-child { margin-top: 0; }
+    .thought-list { margin: 4px 0 0; padding-left: 18px; }
+    .thought-list li { margin-bottom: 2px; }
+
+    .saved-reports { max-height: 330px; overflow: auto; padding: 8px; }
+    .saved-report { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 10px; border-bottom: 1px solid #e6ebe7; }
+    .saved-report:last-child { border-bottom: 0; }
+    .saved-report.active { background: var(--green-soft); box-shadow: inset 3px 0 var(--green); }
+    .saved-report-open { min-width: 0; padding: 0; color: var(--ink); background: transparent; border-radius: 0; text-align: left; }
+    .saved-report-title { display: block; overflow: hidden; font-size: 13px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
+    .saved-report-meta { display: block; color: var(--muted); font-size: 11px; font-weight: 500; }
+    .saved-report-delete { display: grid; width: 30px; min-height: 30px; padding: 0; place-items: center; color: var(--red); background: #f6e8e8; font-size: 16px; }
+    .saved-empty { padding: 28px 16px; color: var(--muted); text-align: center; font-size: 13px; }
+
+    .report-card { min-height: 740px; }
+    .report-controls { display: flex; align-items: center; justify-content: flex-end; gap: 14px; }
+    .view-tabs { display: inline-flex; padding: 3px; background: #e7ebe8; border-radius: 8px; }
+    .view-tab { min-height: 30px; padding: 0 11px; color: var(--muted); background: transparent; border-radius: 6px; font-size: 12px; }
+    .view-tab[aria-selected="true"] { color: var(--green); background: #fff; box-shadow: 0 1px 3px rgba(31, 45, 39, .12); }
+    .report-actions { display: flex; align-items: center; gap: 7px; }
+    .report-actions button { min-height: 32px; padding: 0 10px; font-size: 11px; }
+    .writing-status { display: none; align-items: center; gap: 6px; color: var(--amber); font-size: 12px; font-weight: 800; }
+    .writing-status.active { display: inline-flex; }
+    .writing-status::before { width: 7px; height: 7px; background: var(--amber); border-radius: 50%; content: ""; animation: pulse 1.1s infinite; }
+    .paper { width: min(100%, 760px); aspect-ratio: 210 / 297; margin: 0 auto; padding: clamp(28px, 4.4vw, 52px); background: var(--paper); border-radius: 0 0 18px 18px; font-family: "Noto Serif KR", Batang, serif; }
+    .supplement-section { width: min(100%, 760px); min-height: 620px; margin: 0 auto; border: 1px solid #cddbd3; background: #f8fcf9; }
+    .supplement-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-bottom: 1px solid #d8e5dd; }
+    .supplement-head h3 { margin: 0; color: var(--green); font: 800 14px Pretendard, "Noto Sans KR", sans-serif; }
+    .supplement-status { color: var(--muted); font-size: 11px; font-weight: 700; }
+    #supplementBody { min-height: 112px; padding: 16px; font-family: Pretendard, "Noto Sans KR", sans-serif; font-size: 13px; line-height: 1.65; }
+    #supplementBody h1 { margin: 0 0 16px; padding-bottom: 10px; color: #174d39; border-bottom: 2px solid #75a88a; font: 800 24px/1.42 "Noto Serif KR", Batang, serif; overflow-wrap: anywhere; }
+    #supplementBody h2 { margin: 14px 0 6px; color: var(--ink); font-size: 16px; }
+    #supplementBody h2:first-child { margin-top: 0; }
+    #supplementBody h3 { margin: 10px 0 5px; font-size: 14px; }
+    #supplementBody p { margin: 0 0 6px; }
+    #supplementBody ul, #supplementBody ol { margin: 4px 0 8px; padding-left: 20px; }
+    #supplementBody li { margin-bottom: 2px; }
+    #supplementBody table { width: 100%; margin: 8px 0 12px; border-collapse: collapse; font-size: 12px; line-height: 1.55; }
+    #supplementBody th, #supplementBody td { padding: 7px 8px; border: 1px solid #9fb5a8; vertical-align: top; overflow-wrap: anywhere; }
+    #supplementBody th { color: #174d39; background: #e3f0e8; font-weight: 800; }
+    #supplementBody code { padding: 1px 4px; color: #185840; background: #e4f0e8; border-radius: 3px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    #supplementBody .placeholder { color: #738077; }
+    #supplementBody.streaming::after { content: "▋"; color: var(--green); animation: pulse .7s infinite; }
+    #supplementBody[contenteditable="true"] { cursor: text; background: #fffdf6; outline: 2px dashed var(--amber); outline-offset: -5px; }
+    .monthly-plan-section { width: min(100%, 920px); min-height: 620px; margin: 0 auto; padding: 20px; background: #fff; }
+    .monthly-plan-heading { margin: 0 0 4px; font: 700 24px/1.3 "Noto Serif KR", Batang, serif; }
+    .monthly-plan-summary { margin: 0 0 18px; color: var(--muted); font-size: 13px; }
+    .monthly-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .monthly-box { min-height: 164px; padding: 13px; border: 1px solid #b7c8be; background: #fbfdfb; }
+    .monthly-box h3 { margin: 0 0 8px; padding-bottom: 6px; color: var(--green); border-bottom: 1px solid #d9e6de; font: 800 14px Pretendard, "Noto Sans KR", sans-serif; }
+    .monthly-box p { margin: 0 0 5px; font-size: 12px; line-height: 1.55; }
+    .monthly-box ul { margin: 0; padding-left: 17px; font-size: 12px; line-height: 1.55; }
+    .monthly-box li { margin-bottom: 3px; }
+    .monthly-content[contenteditable="true"] { min-height: 104px; padding: 7px; background: #fffdf6; outline: 2px dashed var(--amber); outline-offset: -2px; }
+    .monthly-box.empty-month { color: var(--muted); }
+    .monthly-plan-section .placeholder { padding: 110px 16px; color: var(--muted); text-align: center; }
+    .report-heading { display: flex; align-items: stretch; gap: 10px; padding-bottom: 10px; border-bottom: 3px double #a9aba9; }
+    .report-number { display: grid; flex: 0 0 48px; min-height: 48px; place-items: center; color: #fff; background: #254d78; font-size: 25px; font-weight: 800; }
+    .paper h1 { margin: 0; font: 700 clamp(23px, 3vw, 32px)/1.3 "Noto Serif KR", Batang, serif; }
+    .report-meta { display: grid; grid-template-columns: 58px 1fr 58px 1.25fr; margin: 10px 0 12px; border: 1px solid #9ca59f; font-family: Pretendard, "Noto Sans KR", sans-serif; font-size: 12px; }
+    .report-meta dt, .report-meta dd { min-width: 0; margin: 0; padding: 7px 9px; border-bottom: 1px solid #cdd3cf; }
+    .report-meta dt { background: #f0f3f0; border-right: 1px solid #cdd3cf; font-weight: 800; text-align: center; }
+    .report-meta dd { overflow-wrap: anywhere; }
+    .report-meta dd:nth-of-type(1) { border-right: 1px solid #cdd3cf; }
+    .report-meta dt:nth-last-of-type(-n+2), .report-meta dd:nth-last-of-type(-n+2) { border-bottom: 0; }
+    #reportBody { color: #202622; font-size: 14px; line-height: 1.58; }
+    #reportBody h2 { margin: 18px 0 8px; color: var(--ink); font-size: 18px; }
+    #reportBody h2::before { content: "□ "; }
+    #reportBody h2:first-child { margin-top: 0; }
+    #reportBody h3 { margin: 12px 0 6px; color: var(--ink); font-size: 15px; }
+    #reportBody p { margin: 0 0 6px; }
+    #reportBody hr { margin: 10px 0; border: 0; border-top: 1px solid #8f9792; }
+    #reportBody ul, #reportBody ol { margin: 4px 0 9px; padding-left: 20px; }
+    #reportBody li { margin-bottom: 2px; }
+    #reportBody table { width: 100%; margin: 7px 0 10px; border-collapse: collapse; font-family: Pretendard, "Noto Sans KR", sans-serif; font-size: 12px; text-align: center; }
+    #reportBody th, #reportBody td { padding: 4px 6px; border: 1px solid #8f9792; overflow-wrap: anywhere; }
+    #reportBody th { background: #e8eae8; font-weight: 800; }
+    #reportBody .report-bullet { margin: 0 0 5px; padding-left: 18px; text-indent: -18px; }
+    #reportBody .report-quarter-detail { margin: -3px 0 6px; padding-left: 62px; }
+    #reportBody .report-solution { margin: -2px 0 8px 28px; padding-left: 18px; text-indent: -18px; color: #55625b; }
+    #reportBody .key-message { margin: 0 0 5px; font-weight: 700; }
+    #reportBody .placeholder { color: #a0a8a3; font-family: inherit; }
+    #reportBody.streaming::after { content: "▋"; color: var(--green); animation: pulse .7s infinite; }
+    #reportTitle[contenteditable="true"], #reportCategory[contenteditable="true"], #reportDepartment[contenteditable="true"], #reportBody[contenteditable="true"] {
+      cursor: text;
+      background: #fffdf6;
+      border-radius: 6px;
+      outline: 2px dashed var(--amber);
+      outline-offset: 3px;
+    }
+
+    .toast { position: fixed; right: 24px; bottom: 24px; z-index: 5; max-width: min(420px, calc(100vw - 48px)); padding: 12px 16px; color: #fff; background: #28312c; border-radius: 10px; box-shadow: var(--shadow); font-size: 13px; opacity: 0; transform: translateY(12px); pointer-events: none; transition: .2s; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.error { background: #8c3838; }
+
+    @media (max-width: 900px) {
+      .shell { padding: 20px; }
+      header { align-items: flex-start; flex-direction: column; }
+      .account-controls { align-self: flex-end; }
+      .workspace { grid-template-columns: 1fr; }
+      .left-column { width: 100%; }
+      #timeline { max-height: 320px; }
+      .report-card { min-height: auto; }
+      .card-head { align-items: flex-start; flex-direction: column; }
+      .report-controls { width: 100%; align-items: flex-start; flex-direction: column; }
+      .report-actions { flex-wrap: wrap; }
+      .monthly-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .report-meta { grid-template-columns: 62px 1fr; }
+      .report-meta dt, .report-meta dd, .report-meta dd:nth-of-type(1) { border-right: 0; }
+      .report-meta dt { border-right: 1px solid #cdd3cf; }
+      .report-meta dt:nth-last-of-type(-n+2), .report-meta dd:nth-last-of-type(-n+2) { border-bottom: 1px solid #cdd3cf; }
+      .report-meta dt:last-of-type, .report-meta dd:last-of-type { border-bottom: 0; }
+    }
+    @media (max-width: 520px) {
+      .monthly-plan-section { padding: 14px; }
+      .monthly-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div id="loginOverlay" class="login-overlay">
+    <form id="loginForm" class="login-panel">
+      <h1>ReportAI 로그인</h1>
+      <p>기관 계정으로 로그인해 개인 보고서를 확인합니다.</p>
+      <label for="loginUsername">아이디</label>
+      <input id="loginUsername" name="username" autocomplete="username" required>
+      <label for="loginPassword">비밀번호</label>
+      <input id="loginPassword" name="password" type="password" autocomplete="current-password" required>
+      <button id="loginButton" class="primary" type="submit">로그인</button>
+      <p id="loginError" class="login-error" role="alert"></p>
+    </form>
+  </div>
+  <main class="shell">
+    <header>
+      <div>
+        <p class="eyebrow">ReportAI</p>
+        <h1>ReportAI : 업무는 스마트하게, 역량은 완벽하게</h1>
+        <p class="project-summary"><strong>ReportAI</strong>는 단순한 자동화를 넘어, 불필요한 보고 프로세스를 최소화하는 <strong>업무 간소화</strong>와 실무자의 업무 역량과 전문성을 강화하는 <strong>직무 리스킬링(Re-Skilling)</strong>을 지원하는 AX 서비스입니다.</p>
+
+        <div class="connection"><span id="connectionDot" class="dot"></span><span id="connectionText">서버 확인 전</span></div>
+      </div>
+      <div class="account-controls"><span id="accountName" class="account-name"></span><button id="logoutButton" class="secondary logout-button" type="button">로그아웃</button></div>
+    </header>
+
+    <div class="workspace">
+      <div class="left-column">
+        <section class="request-box" aria-label="보고서 설정">
+        <div class="request-head">
+          <h2>ReportAI_Prompt</h2>
+        </div>
+        <div class="request-body">
+          <textarea id="request" placeholder="예: 생성형 AI를 활용한 행정업무 효율화 방안"></textarea>
+          <div class="actions">
+            <span class="hint">에이전트 응답 및 보고서는 로컬 서버에서 처리됩니다.</span>
+            <div class="button-row">
+              <button id="stopButton" class="danger" disabled>중지</button>
+              <button id="runButton" class="primary">보고서 작성</button>
+            </div>
+          </div>
+        </div>
+        </section>
+
+        <section class="card activity-card" aria-label="에이전트 처리 내역">
+          <div class="card-head"><h2>Agent Activity</h2><span id="stepBadge" class="badge">대기</span></div>
+          <div id="timeline"><div class="empty">작성을 시작하면 에이전트별 처리 내용이<br>이곳에 순서대로 표시됩니다.</div></div>
+        </section>
+
+        <section class="card" aria-label="저장 보고서">
+          <div class="card-head"><h2>Saved Reports</h2><span id="savedCount" class="badge">0건</span></div>
+          <div id="savedReports" class="saved-reports"><div class="saved-empty">저장된 보고서를 불러오는 중입니다.</div></div>
+        </section>
+
+        <section class="card config-card" aria-label="환경설정">
+          <div class="card-head"><h2>환경설정</h2></div>
+          <div class="config-body">
+            <div class="settings">
+              <div>
+                <label for="baseUrl">llama-server 주소</label>
+                <input id="baseUrl" value="http://127.0.0.1:8080/v1" spellcheck="false">
+              </div>
+              <div>
+                <label for="model">모델 ID</label>
+                <input id="model" placeholder="서버에서 자동 감지" spellcheck="false">
+              </div>
+            </div>
+            <div class="prompt-settings">
+              <label for="promptSelect">에이전트 프롬프트</label>
+              <select id="promptSelect">
+                <option value="supervisor">슈퍼바이저 에이전트</option>
+                <option value="report_writing">보고서(기본)작성 에이전트</option>
+                <option value="document_writer">보고서(기관서식) 에이전트</option>
+                <option value="supervisor_assessment">보고서 요청 적절성 판단 에이전트</option>
+                <option value="report_revision">보고서 재작성 에이전트</option>
+                <option value="report_review">보고서 검토 에이전트</option>
+                <option value="supplement_generation">보충자료 생성 에이전트</option>
+                <option value="monthly_plan_generation">월간계획 생성 에이전트</option>
+              </select>
+              <label for="promptEditor">Markdown 내용</label>
+              <textarea id="promptEditor" spellcheck="false" disabled></textarea>
+              <div class="prompt-actions"><button id="savePromptButton" class="secondary" disabled>프롬프트 저장</button></div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <section class="card report-card" aria-label="AI-Generated Report">
+        <div class="card-head">
+          <h2>AI-Generated Report</h2>
+          <div class="report-controls">
+            <div class="view-tabs" role="tablist" aria-label="문서 보기 전환">
+              <button id="reportTab" class="view-tab" type="button" role="tab" aria-selected="true" aria-controls="reportView">보고서</button>
+              <button id="supplementTab" class="view-tab" type="button" role="tab" aria-selected="false" aria-controls="supplementView">보충자료</button>
+              <button id="monthlyPlanTab" class="view-tab" type="button" role="tab" aria-selected="false" aria-controls="monthlyPlanView">월간업무계획</button>
+            </div>
+            <div class="report-actions">
+              <span id="writingStatus" class="writing-status" role="status">작성 중</span>
+              <button id="editButton" class="secondary" disabled>수정</button>
+              <button id="saveButton" class="secondary" disabled>DB 저장</button>
+              <button id="supplementButton" class="primary" disabled>보충자료 생성</button>
+              <button id="monthlyPlanButton" class="primary" disabled>월간계획 생성</button>
+            </div>
+          </div>
+        </div>
+        <div id="reportView" role="tabpanel" aria-labelledby="reportTab">
+          <article class="paper">
+            <div class="report-heading"><span class="report-number">1</span><h1 id="reportTitle">보고서 제목</h1></div>
+            <dl class="report-meta">
+              <dt>구분</dt><dd id="reportCategory">□ 공약&nbsp;&nbsp;□ 중점&nbsp;&nbsp;□ 계속</dd>
+              <dt>소관</dt><dd id="reportDepartment">담당 부서</dd>
+            </dl>
+            <div id="reportBody"><p class="placeholder">작성된 보고서가 이곳에 실시간으로 나타납니다.</p></div>
+          </article>
+        </div>
+        <section id="supplementView" class="supplement-section" role="tabpanel" aria-labelledby="supplementTab" hidden>
+          <div class="supplement-head"><h3>직무 리스킬 보충자료</h3><span id="supplementStatus" class="supplement-status">보고서를 저장한 뒤 작성할 수 있습니다.</span></div>
+          <div id="supplementBody"><p class="placeholder">선택한 보고서의 업무 주제에 맞춘 학습 목표, 실습 과제, 확인 항목이 이곳에 표시됩니다.</p></div>
+        </section>
+        <section id="monthlyPlanView" class="monthly-plan-section" role="tabpanel" aria-labelledby="monthlyPlanTab" hidden>
+          <h3 class="monthly-plan-heading">월간업무계획</h3>
+          <p id="monthlyPlanSummary" class="monthly-plan-summary">보고서와 보충자료를 바탕으로 1월부터 12월까지의 추진 계획을 작성합니다.</p>
+          <div id="monthlyPlanGrid" class="monthly-grid"></div>
+        </section>
+      </section>
+    </div>
+  </main>
+  <div id="toast" class="toast" role="status"></div>
+
+  <script>
+    "use strict";
+
+    const $ = (selector) => document.querySelector(selector);
+    const PLANNING_YEAR = new Date().getFullYear() + 1;
+    const REPORT_STORAGE_URL = "/api/reports";
+    const PROMPT_URL = "/api/prompts";
+    const AUTH_URL = "/api/auth";
+    const state = { running: false, editing: false, supplementWriting: false, supplementEditing: false, monthlyPlanWriting: false, monthlyPlanEditing: false, controller: null, model: "", title: "", category: "신규(특화)사업", department: "담당 부서", document: "", supplement: "", monthlyPlan: "", entries: 0, approved: false, score: 0, attempts: 1, selectedReportId: null, prompts: null, promptLoadPromise: null };
+
+    function endpoint(path) {
+      return `/api/llm${path}`;
+    }
+
+    function getPrompt(name) {
+      const prompt = state.prompts?.[name];
+      if (!prompt) throw new Error(`프롬프트를 불러오지 못했습니다: ${name}`);
+      return prompt;
+    }
+
+    function renderPrompt(name, values) {
+      return getPrompt(name).replace(/\{\{([a-z_]+)\}\}/g, (_, key) => String(values[key] ?? ""));
+    }
+
+    function showSelectedPrompt() {
+      const name = $("#promptSelect").value;
+      $("#promptEditor").value = state.prompts?.[name] || "";
+      $("#promptEditor").disabled = !state.prompts;
+      $("#savePromptButton").disabled = !state.prompts;
+    }
+
+    async function loadPrompts() {
+      const response = await fetch(PROMPT_URL);
+      const data = await response.json();
+      if (!response.ok || !data.prompts) throw new Error(data.error || "프롬프트 목록을 불러오지 못했습니다.");
+      state.prompts = data.prompts;
+      showSelectedPrompt();
+    }
+
+    async function ensurePrompts() {
+      if (!state.promptLoadPromise) state.promptLoadPromise = loadPrompts();
+      await state.promptLoadPromise;
+    }
+
+    function setConnection(kind, text) {
+      $("#connectionDot").className = `dot ${kind || ""}`;
+      $("#connectionText").textContent = text;
+    }
+
+    function setRunning(running) {
+      state.running = running;
+      $("#runButton").disabled = running;
+      $("#stopButton").disabled = !running;
+      $("#baseUrl").disabled = running;
+      $("#model").disabled = running;
+      $("#editButton").disabled = running || !state.document;
+      if (running) setEditing(false);
+    }
+
+    function showToast(message, isError = false) {
+      const toast = $("#toast");
+      toast.textContent = message;
+      toast.className = `toast show${isError ? " error" : ""}`;
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => toast.className = "toast", 2800);
+    }
+
+    function updateSaveButton() {
+      const showingSupplement = $("#supplementTab").getAttribute("aria-selected") === "true";
+      const showingMonthlyPlan = $("#monthlyPlanTab").getAttribute("aria-selected") === "true";
+      const isEditing = state.editing || state.supplementEditing || state.monthlyPlanEditing;
+      const canEditCurrentView = showingMonthlyPlan
+        ? Boolean(state.monthlyPlan && state.selectedReportId)
+        : showingSupplement ? Boolean(state.supplement && state.selectedReportId) : Boolean(state.document);
+      $("#saveButton").textContent = state.selectedReportId ? "DB 업데이트" : "DB 저장";
+      $("#saveButton").disabled = state.running || isEditing || !state.document;
+      $("#supplementButton").disabled = state.running || isEditing || state.supplementWriting || !state.document || !state.selectedReportId;
+      $("#monthlyPlanButton").disabled = state.running || isEditing || state.monthlyPlanWriting || !state.document || !state.supplement || !state.selectedReportId;
+      $("#editButton").textContent = isEditing ? "완료" : "수정";
+      $("#editButton").disabled = !isEditing && (state.running || state.supplementWriting
+        || state.monthlyPlanWriting || !canEditCurrentView);
+      $("#reportTab").disabled = isEditing;
+      $("#supplementTab").disabled = isEditing;
+      $("#monthlyPlanTab").disabled = isEditing;
+    }
+
+    function selectDocumentView(view) {
+      if (state.editing || state.supplementEditing) return;
+      const showSupplement = view === "supplement";
+      const showMonthlyPlan = view === "monthly-plan";
+      $("#reportView").hidden = showSupplement || showMonthlyPlan;
+      $("#supplementView").hidden = !showSupplement;
+      $("#monthlyPlanView").hidden = !showMonthlyPlan;
+      $("#reportTab").setAttribute("aria-selected", String(!showSupplement && !showMonthlyPlan));
+      $("#supplementTab").setAttribute("aria-selected", String(showSupplement));
+      $("#monthlyPlanTab").setAttribute("aria-selected", String(showMonthlyPlan));
+      updateSaveButton();
+    }
+
+    function showSupplement(content, streaming = false) {
+      state.supplement = content.trim();
+      const body = $("#supplementBody");
+      body.innerHTML = state.supplement
+        ? renderMarkdown(state.supplement)
+        : '<p class="placeholder">선택한 보고서의 업무 주제에 맞춘 학습 목표, 실습 과제, 확인 항목이 이곳에 표시됩니다.</p>';
+      body.classList.toggle("streaming", streaming);
+      $("#supplementStatus").textContent = streaming
+        ? "보충자료 작성 중"
+        : state.supplement ? "보고서와 연계 저장됨" : state.selectedReportId ? "보충자료를 작성할 수 있습니다." : "보고서를 저장한 뒤 작성할 수 있습니다.";
+      updateSaveButton();
+    }
+
+    function monthlyPlanMonths(markdown) {
+      const sections = markdown.split(/^##\s*(1[0-2]|[1-9])월\s*$/m);
+      const months = new Map();
+      for (let index = 1; index < sections.length; index += 2) {
+          months.set(Number(sections[index]), (sections[index + 1] || "").trim());
+      }
+      return months;
+    }
+
+    function showMonthlyPlan(content, streaming = false) {
+      state.monthlyPlan = content.trim();
+      const grid = $("#monthlyPlanGrid");
+      const summary = $("#monthlyPlanSummary");
+      grid.innerHTML = "";
+      if (!state.monthlyPlan) {
+        summary.textContent = streaming ? "월별 추진 계획을 작성 중입니다." : "보고서와 보충자료를 바탕으로 1월부터 12월까지의 추진 계획을 작성합니다.";
+        updateSaveButton();
+        return;
+      }
+      const months = monthlyPlanMonths(state.monthlyPlan);
+      for (let month = 1; month <= 12; month += 1) {
+        const box = document.createElement("section");
+        box.className = "monthly-box";
+        const monthContent = months.get(month);
+        box.innerHTML = `<h3>${month}월</h3><div class="monthly-content">${monthContent ? renderMarkdown(monthContent) : '<p class="empty-month">추진 계획 확인 필요</p>'}</div>`;
+        grid.append(box);
+      }
+      summary.textContent = streaming ? "월별 추진 계획을 작성 중입니다." : "보고서와 보충자료를 반영한 연간 월별 추진 계획입니다.";
+      updateSaveButton();
+    }
+
+    async function setSupplementEditing(editing) {
+      const body = $("#supplementBody");
+      if (editing) {
+        state.supplementEditing = true;
+        body.contentEditable = "true";
+        updateSaveButton();
+        body.focus();
+        return;
+      }
+
+      const content = htmlToMarkdown(body);
+      if (!content) {
+        showToast("보충자료 내용은 비워둘 수 없습니다.", true);
+        return;
+      }
+      $("#editButton").disabled = true;
+      try {
+        const response = await fetch(`${REPORT_STORAGE_URL}/${state.selectedReportId}/supplement`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content })
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || `저장 실패 (${response.status})`);
+        state.supplementEditing = false;
+        body.contentEditable = "false";
+        showSupplement(result.content);
+        showToast("수정한 보충자료를 저장했습니다.");
+      } catch (error) {
+        console.error(error);
+        showToast(`보충자료 저장 실패: ${error.message}`, true);
+        updateSaveButton();
+      }
+    }
+
+    function monthlyPlanMarkdown() {
+      const sections = ["# 월간업무계획"];
+      document.querySelectorAll("#monthlyPlanGrid .monthly-box").forEach((box, index) => {
+        const content = htmlToMarkdown(box.querySelector(".monthly-content"));
+        sections.push(`## ${index + 1}월`, content);
+      });
+      return sections.join("\n\n").trim();
+    }
+
+    async function setMonthlyPlanEditing(editing) {
+      const contents = document.querySelectorAll("#monthlyPlanGrid .monthly-content");
+      if (editing) {
+        state.monthlyPlanEditing = true;
+        contents.forEach(content => content.contentEditable = "true");
+        updateSaveButton();
+        contents[0]?.focus();
+        return;
+      }
+
+      const content = monthlyPlanMarkdown();
+      $("#editButton").disabled = true;
+      try {
+        const response = await fetch(`${REPORT_STORAGE_URL}/${state.selectedReportId}/monthly-plan`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content })
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || `저장 실패 (${response.status})`);
+        state.monthlyPlanEditing = false;
+        showMonthlyPlan(result.content);
+        showToast("수정한 월간업무계획을 저장했습니다.");
+      } catch (error) {
+        console.error(error);
+        showToast(`월간업무계획 저장 실패: ${error.message}`, true);
+        updateSaveButton();
+      }
+    }
+
+    function reportPayload() {
+      return {
+        title: state.title || "제목 미생성",
+        category: state.category,
+        department: state.department,
+        request: $("#request").value.trim(),
+        document: state.document.trim(),
+        approved: state.approved,
+        score: state.score,
+        attempts: state.attempts
+      };
+    }
+
+    async function persistReport(automatic = false) {
+      const isUpdate = Boolean(state.selectedReportId);
+      const response = await fetch(isUpdate ? `${REPORT_STORAGE_URL}/${state.selectedReportId}` : REPORT_STORAGE_URL, {
+        method: isUpdate ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(reportPayload())
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || `저장 실패 (${response.status})`);
+      state.selectedReportId = result.id;
+      await loadSavedReports();
+      updateSaveButton();
+      showToast(automatic
+        ? `보고서 작성 완료 후 데이터베이스에 자동 저장했습니다. (ID: ${result.id})`
+        : isUpdate ? "데이터베이스 보고서를 업데이트했습니다." : `데이터베이스에 저장했습니다. (ID: ${result.id})`);
+    }
+
+    function formatSavedAt(value) {
+      return new Intl.DateTimeFormat("ko-KR", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(value));
+    }
+
+    function renderSavedReports(reports) {
+      const container = $("#savedReports");
+      $("#savedCount").textContent = `${reports.length}건`;
+      container.innerHTML = "";
+      if (!reports.length) {
+        container.innerHTML = '<div class="saved-empty">저장된 보고서가 없습니다.</div>';
+        return;
+      }
+      reports.forEach(report => {
+        const item = document.createElement("article");
+        item.className = `saved-report${report.id === state.selectedReportId ? " active" : ""}`;
+        const open = document.createElement("button");
+        open.className = "saved-report-open";
+        open.dataset.reportId = report.id;
+        open.innerHTML = `<span class="saved-report-title"></span><span class="saved-report-meta"></span>`;
+        open.querySelector(".saved-report-title").textContent = report.title;
+        open.querySelector(".saved-report-meta").textContent = `${formatSavedAt(report.created_at)} · ${report.approved ? "승인" : "미승인"} ${report.score}점`;
+        const remove = document.createElement("button");
+        remove.className = "saved-report-delete";
+        remove.dataset.deleteReportId = report.id;
+        remove.setAttribute("aria-label", `${report.title} 삭제`);
+        remove.title = "삭제";
+        remove.textContent = "×";
+        item.append(open, remove);
+        container.append(item);
+      });
+    }
+
+    async function loadSavedReports(openLatest = false) {
+      try {
+        const response = await fetch(REPORT_STORAGE_URL);
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || `조회 실패 (${response.status})`);
+        const reports = result.reports || [];
+        renderSavedReports(reports);
+        if (openLatest && reports.length && !state.selectedReportId) await openSavedReport(reports[0].id);
+      } catch (error) {
+        $("#savedReports").innerHTML = '<div class="saved-empty">저장 서버에 연결할 수 없습니다.</div>';
+      }
+    }
+
+    async function openSavedReport(reportId) {
+      if (state.running || state.editing) return;
+      try {
+        const response = await fetch(`${REPORT_STORAGE_URL}/${reportId}`);
+        const report = await response.json();
+        if (!response.ok) throw new Error(report.error || `조회 실패 (${response.status})`);
+        state.selectedReportId = report.id;
+        state.approved = report.approved;
+        state.score = report.score;
+        state.attempts = report.attempts;
+        $("#request").value = report.request;
+        showReport(`# ${report.title}\n> 구분: ${report.category} | 소관: ${report.department}\n\n${report.document}`);
+        showSupplement(report.supplement?.content || "");
+        showMonthlyPlan(report.monthly_plan?.content || "");
+        updateSaveButton();
+        await loadSavedReports();
+      } catch (error) {
+        showToast(`보고서 불러오기 실패: ${error.message}`, true);
+      }
+    }
+
+    async function deleteSavedReport(reportId) {
+      if (!confirm("선택한 저장 보고서를 삭제할까요?")) return;
+      try {
+        const response = await fetch(`${REPORT_STORAGE_URL}/${reportId}`, { method: "DELETE" });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || `삭제 실패 (${response.status})`);
+        if (state.selectedReportId === reportId) {
+          state.selectedReportId = null;
+          showSupplement("");
+          showMonthlyPlan("");
+          updateSaveButton();
+        }
+        await loadSavedReports();
+        showToast("저장 보고서를 삭제했습니다.");
+      } catch (error) {
+        showToast(`삭제 실패: ${error.message}`, true);
+      }
+    }
+
+    function timeNow() {
+      return new Intl.DateTimeFormat("ko-KR", { hour: "2-digit", minute: "2-digit", second: "2-digit" }).format(new Date());
+    }
+
+    function addEvent(agent, stage, options = {}) {
+      const { mirrorContent = true, thinking = false } = options;
+      if (state.entries === 0) $("#timeline").innerHTML = "";
+      state.entries += 1;
+      const article = document.createElement("article");
+      article.className = `event ${agent} streaming`;
+      let body = "";
+      if (thinking) body = '<div class="thought"><p class="thought-line thought-pending">생각을 정리하는 중…</p></div>';
+      else if (mirrorContent) body = '<pre class="stream-text"></pre>';
+      article.innerHTML = `
+        <div class="event-meta">
+          <span class="agent-name">${agent === "supervisor" ? "슈퍼바이저" : "문서작성 에이전트"}</span>
+          <time class="time">${timeNow()}</time>
+        </div>
+        <p class="stage"></p>
+        ${body}`;
+      const stageEl = article.querySelector(".stage");
+      stageEl.textContent = stage;
+      $("#timeline").append(article);
+      article.scrollIntoView({ behavior: "smooth", block: "end" });
+      let charCount = 0;
+      return {
+        element: article,
+        output: article.querySelector(".stream-text"),
+        append(text) {
+          if (thinking) {
+            return; // live rendering handled via renderThought(onChunk)
+          } else if (mirrorContent) {
+            this.output.textContent += text;
+            this.output.scrollTop = this.output.scrollHeight;
+            $("#timeline").scrollTop = $("#timeline").scrollHeight;
+          } else {
+            charCount += text.length;
+            stageEl.textContent = `${stage} (${charCount}자 작성 중)`;
+          }
+        },
+        renderThought(html) {
+          const thoughtEl = article.querySelector(".thought");
+          if (thoughtEl) {
+            thoughtEl.innerHTML = html;
+            this.element.scrollIntoView({ behavior: "smooth", block: "end" });
+            $("#timeline").scrollTop = $("#timeline").scrollHeight;
+          }
+        },
+        done() {
+          this.element.classList.remove("streaming");
+          if (!mirrorContent && !thinking) stageEl.textContent = `${stage} (${charCount}자 작성 완료)`;
+        }
+      };
+    }
+
+    function extractReport(markdown) {
+      const cleaned = markdown
+        .replace(/^\s*```(?:markdown)?\s*/i, "")
+        .replace(/\s*```\s*$/, "")
+        .trimStart();
+      const heading = cleaned.match(/^#\s+([^\n]+)(?:\n|$)/);
+      const content = (heading ? cleaned.slice(heading[0].length) : cleaned).trimStart();
+      const metadata = content.match(/^>\s*구분\s*:\s*([^|\n]+?)\s*\|\s*소관\s*:\s*([^\n]+)\s*(?:\n|$)/);
+      return {
+        title: heading ? heading[1].trim() : "",
+        category: metadata ? metadata[1].trim() : "□ 공약  □ 중점  ☑ 계속",
+        department: metadata ? metadata[2].trim() : "담당 부서",
+        body: (metadata ? content.slice(metadata[0].length) : content).trimStart()
+      };
+    }
+
+    function escapeHtml(value) {
+      return value.replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
+    }
+
+    function inlineMarkdown(value) {
+      return value
+        .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+        .replace(/`([^`]+)`/g, "<code>$1</code>");
+    }
+
+    function renderMarkdown(markdown) {
+      const normalized = markdown
+        .replace(/\s*❍\s*/g, "\n❍ ")
+        .replace(/\s*❖\s*/g, "\n❖ ")
+        .replace(/\s*(?:👉\s*|\(대응방안\)\s*)/g, "\n(대응방안) ")
+        .replace(/\s*(#{1,3}\s+[^\n]+)/g, "\n$1")
+        .trimStart();
+      const lines = escapeHtml(normalized).split("\n");
+      let html = "", paragraph = [], listType = "", tableRows = [];
+      const flushParagraph = () => {
+        if (paragraph.length) html += `<p>${inlineMarkdown(paragraph.join(" "))}</p>`;
+        paragraph = [];
+      };
+      const closeList = () => {
+        if (listType) html += `</${listType}>`;
+        listType = "";
+      };
+      const parseTableCells = line => {
+        if (!line.includes("|")) return null;
+        const cells = line.replace(/^\|\s*|\s*\|$/g, "").split("|").map(cell => cell.trim());
+        return cells.length >= 2 ? cells : null;
+      };
+      const flushTable = () => {
+        if (!tableRows.length) return;
+        const [header, ...rows] = tableRows;
+        html += `<table><thead><tr>${header.map(cell => `<th>${inlineMarkdown(cell)}</th>`).join("")}</tr></thead><tbody>${rows.map(row => `<tr>${row.map(cell => `<td>${inlineMarkdown(cell)}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+        tableRows = [];
+      };
+      let followsQuarter = false;
+      for (const raw of lines) {
+        const line = raw.trim();
+        let match;
+        const tableCells = parseTableCells(line);
+        if (tableCells) {
+          const isDivider = tableCells.every(cell => /^:?-{3,}:?$/.test(cell));
+          if (!isDivider) {
+            flushParagraph(); closeList(); tableRows.push(tableCells);
+          }
+          continue;
+        }
+        flushTable();
+        if (!line) { flushParagraph(); closeList(); followsQuarter = false; continue; }
+        if ((match = line.match(/^❖\s*(.+)$/))) {
+          flushParagraph(); closeList();
+          html += `<p class="key-message">❖ ${inlineMarkdown(match[1])}</p>`;
+        } else if (/^-{3,}$/.test(line)) {
+          flushParagraph(); closeList();
+          html += "<hr>";
+        } else if ((match = line.match(/^(#{1,3})\s+(.+)$/))) {
+          flushParagraph(); closeList();
+          const level = match[1].length;
+          html += `<h${level}>${inlineMarkdown(match[2])}</h${level}>`;
+        } else if ((match = line.match(/^❍\s*(.+)$/))) {
+          flushParagraph(); closeList();
+          html += `<p class="report-bullet">❍ ${inlineMarkdown(match[1])}</p>`;
+        } else if ((match = line.match(/^(?:👉\s*|\(대응방안\)\s*)(.+)$/))) {
+          flushParagraph(); closeList();
+          html += `<p class="report-solution">(대응방안) ${inlineMarkdown(match[1])}</p>`;
+        } else if ((match = line.match(/^[-*]\s+(.+)$/))) {
+          flushParagraph();
+          if (listType !== "ul") { closeList(); listType = "ul"; html += "<ul>"; }
+          html += `<li>${inlineMarkdown(match[1])}</li>`;
+        } else if ((match = line.match(/^\d+[.)]\s+(.+)$/))) {
+          flushParagraph();
+          if (listType !== "ol") { closeList(); listType = "ol"; html += "<ol>"; }
+          html += `<li>${inlineMarkdown(match[1])}</li>`;
+        } else {
+          closeList();
+          if (followsQuarter) {
+            flushParagraph();
+            html += `<p class="report-quarter-detail">${inlineMarkdown(line)}</p>`;
+          } else {
+            paragraph.push(line);
+          }
+          followsQuarter = false;
+        }
+      }
+        flushTable(); flushParagraph(); closeList();
+      return html || '<p class="placeholder">보고서 본문을 생성하는 중입니다.</p>';
+    }
+
+    function showReport(markdown, streaming = false) {
+      const report = extractReport(markdown);
+      state.title = report.title;
+      state.category = report.category;
+      state.department = report.department;
+      state.document = report.body;
+      const visibleTitle = state.title || "슈퍼바이저 에이전트 검토 중";
+      $("#reportTitle").textContent = visibleTitle;
+      $("#reportCategory").textContent = state.category;
+      $("#reportDepartment").textContent = state.department;
+      document.title = visibleTitle;
+      const body = $("#reportBody");
+      body.innerHTML = renderMarkdown(state.document);
+      body.classList.toggle("streaming", streaming);
+      $("#writingStatus").classList.toggle("active", streaming);
+      $("#editButton").disabled = state.running || !state.document;
+      updateSaveButton();
+    }
+
+    function inlineTextOf(node) {
+      const clone = node.cloneNode(true);
+      clone.innerHTML = clone.innerHTML.replace(/<strong>(.*?)<\/strong>/gi, "**$1**").replace(/<code>(.*?)<\/code>/gi, "`$1`");
+      return clone.textContent.replace(/\s+/g, " ").trim();
+    }
+
+    function htmlToMarkdown(root) {
+      const lines = [];
+      root.querySelectorAll(":scope > *").forEach(node => {
+        const tag = node.tagName;
+        if (tag === "H1") lines.push(`# ${inlineTextOf(node)}`, "");
+        else if (tag === "H2") lines.push(`## ${inlineTextOf(node)}`, "");
+        else if (tag === "H3") lines.push(`### ${inlineTextOf(node)}`, "");
+        else if (tag === "HR") lines.push("---", "");
+        else if (node.classList.contains("key-message")) lines.push(`❖ ${inlineTextOf(node).replace(/^❖\s*/, "")}`);
+        else if (node.classList.contains("report-bullet")) lines.push(`❍ ${inlineTextOf(node).replace(/^❍\s*/, "")}`);
+        else if (node.classList.contains("report-solution")) lines.push(`(대응방안) ${inlineTextOf(node).replace(/^(?:👉\s*|\(대응방안\)\s*)/, "")}`);
+        else if (tag === "UL") { node.querySelectorAll(":scope > li").forEach(li => lines.push(`- ${inlineTextOf(li)}`)); lines.push(""); }
+        else if (tag === "OL") { [...node.querySelectorAll(":scope > li")].forEach((li, idx) => lines.push(`${idx + 1}. ${inlineTextOf(li)}`)); lines.push(""); }
+        else if (tag === "TABLE") {
+          const headerCells = [...node.querySelectorAll("thead th")].map(inlineTextOf);
+          if (headerCells.length) {
+            lines.push(`| ${headerCells.join(" | ")} |`);
+            lines.push(`|${headerCells.map(() => " --- ").join("|")}|`);
+          }
+          node.querySelectorAll("tbody tr").forEach(tr => {
+            lines.push(`| ${[...tr.querySelectorAll("td")].map(inlineTextOf).join(" | ")} |`);
+          });
+          lines.push("");
+        } else if (tag === "P") {
+          const text = inlineTextOf(node);
+          if (text) lines.push(text);
+        }
+      });
+      return lines.join("\n").replace(/\n{3,}/g, "\n\n").trim();
+    }
+
+    function setEditing(editing) {
+      state.editing = editing;
+      ["reportTitle", "reportCategory", "reportDepartment", "reportBody"].forEach(id => {
+        document.getElementById(id).contentEditable = editing ? "true" : "false";
+      });
+      $("#editButton").textContent = editing ? "완료" : "수정";
+      updateSaveButton();
+      if (editing) {
+        $("#reportBody").focus();
+      } else {
+        state.title = $("#reportTitle").textContent.trim();
+        state.category = $("#reportCategory").textContent.trim();
+        state.department = $("#reportDepartment").textContent.trim();
+        state.document = htmlToMarkdown($("#reportBody"));
+        document.title = state.title || "보고서 제목";
+      }
+    }
+
+    function parseJsonObject(text) {
+      const cleaned = text.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
+      try { return JSON.parse(cleaned); } catch (_) {
+        const match = cleaned.match(/\{[\s\S]*\}/);
+        if (!match) throw new Error("슈퍼바이저의 JSON 응답을 해석하지 못했습니다.");
+        return JSON.parse(match[0]);
+      }
+    }
+
+    async function detectModel(signal) {
+      const specified = $("#model").value.trim();
+      if (specified) return specified;
+      const response = await fetch(endpoint("/models"), { signal });
+      if (!response.ok) throw new Error(`모델 조회 실패 (${response.status})`);
+      const data = await response.json();
+      const model = data.data?.[0]?.id;
+      if (!model) throw new Error("실행 중인 모델을 찾지 못했습니다.");
+      $("#model").value = model;
+      return model;
+    }
+
+    async function streamChat(system, user, temperature, event, onChunk) {
+      const response = await fetch(endpoint("/chat/completions"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        signal: state.controller.signal,
+        body: JSON.stringify({
+          model: state.model,
+          messages: [{ role: "system", content: system }, { role: "user", content: user }],
+          temperature,
+          max_tokens: 4096,
+          stream: true
+        })
+      });
+      if (!response.ok) {
+        const detail = await response.text();
+        throw new Error(`모델 호출 실패 (${response.status}): ${detail.slice(0, 180)}`);
+      }
+      if (!response.body) throw new Error("이 브라우저는 스트리밍 응답을 지원하지 않습니다.");
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "", fullText = "";
+
+      while (true) {
+        const { value, done } = await reader.read();
+        buffer += decoder.decode(value || new Uint8Array(), { stream: !done });
+        const lines = buffer.split(/\r?\n/);
+        buffer = done ? "" : lines.pop();
+        for (const line of lines) {
+          if (!line.startsWith("data:")) continue;
+          const payload = line.slice(5).trim();
+          if (!payload || payload === "[DONE]") continue;
+          try {
+            const data = JSON.parse(payload);
+            const chunk = data.choices?.[0]?.delta?.content || "";
+            if (chunk) {
+              fullText += chunk;
+              event.append(chunk);
+              if (onChunk) onChunk(fullText);
+            }
+          } catch (error) {
+            console.warn("SSE 조각 해석 실패", error, payload);
+          }
+        }
+        if (done) break;
+      }
+      event.done();
+      return fullText.trim();
+    }
+
+    function unescapeJsonString(raw) {
+      const value = raw.endsWith("\\") ? raw.slice(0, -1) : raw;
+      return value
+        .replace(/\\r\\n/g, "\n")
+        .replace(/\\n/g, "\n")
+        .replace(/\\t/g, " ")
+        .replace(/\\"/g, '"')
+        .replace(/\\\\/g, "\\");
+    }
+
+    function extractStringField(buffer, key) {
+      const openMatch = buffer.match(new RegExp('"' + key + '"\\s*:\\s*"'));
+      if (!openMatch) return null;
+      const rest = buffer.slice(openMatch.index + openMatch[0].length);
+      let closeIdx = -1;
+      for (let i = 0; i < rest.length; i++) {
+        if (rest[i] === '"' && rest[i - 1] !== "\\") { closeIdx = i; break; }
+      }
+      return unescapeJsonString(closeIdx === -1 ? rest : rest.slice(0, closeIdx));
+    }
+
+    function renderThoughtText(text) {
+      const lines = escapeHtml(text).split(/\n+/).map(line => line.trim()).filter(Boolean);
+      if (!lines.length) return "";
+      let html = "", inList = false;
+      for (const line of lines) {
+        const bullet = line.match(/^[*-]\s+(.+)$/);
+        if (bullet) {
+          if (!inList) { html += '<ul class="thought-list">'; inList = true; }
+          html += `<li>${inlineMarkdown(bullet[1])}</li>`;
+        } else {
+          if (inList) { html += "</ul>"; inList = false; }
+          html += `<p class="thought-line">${inlineMarkdown(line)}</p>`;
+        }
+      }
+      if (inList) html += "</ul>";
+      return html;
+    }
+
+    function extractBoolField(buffer, key) {
+      const pattern = new RegExp('"' + key + '"\\s*:\\s*(true|false)');
+      const match = buffer.match(pattern);
+      return match ? match[1] === "true" : null;
+    }
+
+    function extractNumberField(buffer, key) {
+      const pattern = new RegExp('"' + key + '"\\s*:\\s*(-?\\d+(?:\\.\\d+)?)');
+      const match = buffer.match(pattern);
+      return match ? Number(match[1]) : null;
+    }
+
+    function extractArrayField(buffer, key) {
+      const pattern = new RegExp('"' + key + '"\\s*:\\s*(\\[[^\\]]*\\])');
+      const match = buffer.match(pattern);
+      if (!match) return null;
+      try { return JSON.parse(match[1]); } catch (_) { return null; }
+    }
+
+    function extractStreamingStringArray(buffer, key) {
+      const openMatch = buffer.match(new RegExp('"' + key + '"\\s*:\\s*\\['));
+      if (!openMatch) return null;
+      const items = [];
+      let index = openMatch.index + openMatch[0].length;
+      while (index < buffer.length) {
+        while (/[\s,]/.test(buffer[index])) index += 1;
+        if (buffer[index] === "]" || index >= buffer.length) break;
+        if (buffer[index] !== '"') break;
+        index += 1;
+        let value = "", escaped = false, closed = false;
+        while (index < buffer.length) {
+          const char = buffer[index++];
+          if (char === '"' && !escaped) { closed = true; break; }
+          value += char;
+          escaped = char === "\\" ? !escaped : false;
+        }
+        if (value) items.push(unescapeJsonString(value));
+        if (!closed) break;
+      }
+      return items;
+    }
+
+    function renderAssessmentThought(buffer, done = false) {
+      const suitable = extractBoolField(buffer, "suitable");
+      const reason = extractStringField(buffer, "reason");
+      const brief = extractStringField(buffer, "writing_brief");
+      const parts = [];
+      parts.push(suitable === null
+        ? '<p class="thought-line thought-pending">적절성을 판단하는 중…</p>'
+        : `<p class="thought-line">${suitable ? "✅ 보고서 작성에 적절한 요청으로 판단했습니다." : "⚠️ 보고서 작성에 부적절한 요청으로 판단했습니다."}</p>`);
+      if (reason) {
+        parts.push('<p class="thought-line thought-label">💭 판단 이유</p>');
+        parts.push(renderThoughtText(reason));
+      } else if (done) {
+        parts.push('<p class="thought-line">💭 판단 이유 없음</p>');
+      }
+      if (brief) {
+        parts.push('<p class="thought-line thought-label">📝 작성 방향</p>');
+        parts.push(renderThoughtText(brief));
+      } else if (done) {
+        parts.push('<p class="thought-line">📝 작성 방향: 요청에 충실하게 작성</p>');
+      }
+      return parts.join("");
+    }
+
+    function renderReviewThought(buffer, done = false) {
+      const approved = extractBoolField(buffer, "approved");
+      const score = extractNumberField(buffer, "score");
+      const summary = extractStringField(buffer, "summary");
+      const feedback = extractStreamingStringArray(buffer, "feedback");
+      if (!done && score === null && !summary && !Array.isArray(feedback) && buffer) {
+        return `<p class="thought-line thought-pending">검토 결과를 정리하는 중…</p><pre class="stream-text">${escapeHtml(buffer)}</pre>`;
+      }
+      const parts = [];
+      if (score === null) parts.push('<p class="thought-line thought-pending">검토 결과를 정리하는 중…</p>');
+      else parts.push(`<p class="thought-line">${approved && score >= 80 ? `✅ ${score}점으로 승인했습니다.` : `⚠️ ${score}점으로 수정이 필요합니다.`}</p>`);
+      const items = Array.isArray(feedback) ? feedback.filter(Boolean) : [];
+      if (items.length) {
+        parts.push('<p class="thought-line thought-label">📋 수정사항</p>');
+        parts.push(`<ul class="thought-list">${items.map(item => `<li>${inlineMarkdown(escapeHtml(String(item)))}</li>`).join("")}</ul>`);
+      }
+      if (summary) {
+        parts.push('<p class="thought-line thought-label">💭 총평</p>');
+        parts.push(renderThoughtText(summary));
+      } else if (done) {
+        parts.push('<p class="thought-line">💭 총평 없음</p>');
+      }
+      return parts.join("");
+    }
+
+    async function supervisorAssessment(request) {
+      $("#stepBadge").textContent = "적절성 판단";
+      const event = addEvent("supervisor", "요청의 보고서 작성 적절성과 작성 방향을 판단합니다.", { thinking: true });
+      const prompt = renderPrompt("supervisor_assessment", { request });
+      const text = await streamChat(getPrompt("supervisor"), prompt, 0.1, event, buffer => event.renderThought(renderAssessmentThought(buffer)));
+      const assessment = parseJsonObject(text);
+      event.renderThought(renderAssessmentThought(text, true));
+      return assessment;
+    }
+
+    async function writerDraft(request, brief, revision, review) {
+      const label = revision === 0 ? "초안 작성" : `${revision}차 재작성`;
+      $("#stepBadge").textContent = label;
+      const event = addEvent("writer", revision === 0 ? "슈퍼바이저 지침을 바탕으로 약 1페이지 분량의 초안을 작성합니다." : "검토 의견을 반영해 보고서 전체를 다시 작성합니다.", { mirrorContent: false });
+      let prompt;
+      if (revision === 0) {
+        prompt = renderPrompt("report_writing", { request, brief, planning_year: PLANNING_YEAR });
+      } else {
+        const feedback = Array.isArray(review.feedback) ? review.feedback.map(item => `- ${item}`).join("\n") : `- ${review.feedback || "완성도를 높일 것"}`;
+        prompt = renderPrompt("report_revision", { request, score: review.score, summary: review.summary || "", feedback, planning_year: PLANNING_YEAR, title: state.title || "리포트 내 제목", document: state.document });
+      }
+      showReport("", true);
+      const documentText = await streamChat(getPrompt("document_writer"), prompt, revision === 0 ? 0.45 : 0.35, event, text => showReport(text, true));
+      showReport(documentText, false);
+      return state.document;
+    }
+
+    async function supervisorReview(request, documentText, revision) {
+      $("#stepBadge").textContent = revision === 0 ? "초안 검증" : `${revision}차 검증`;
+      const event = addEvent("supervisor", "요청 충족도, 논리, 사실성, 분량을 평가하고 승인 여부를 결정합니다.", { thinking: true });
+      const prompt = renderPrompt("report_review", { request, title: state.title || "제목 미생성", document: documentText });
+      const text = await streamChat(getPrompt("supervisor"), prompt, 0.1, event, buffer => event.renderThought(renderReviewThought(buffer)));
+      const review = parseJsonObject(text);
+      review.score = Math.max(0, Math.min(100, Number(review.score) || 0));
+      review.approved = Boolean(review.approved) && review.score >= 80;
+      const problemHeading = /^##\s*예상문제점\s*$/m.exec(documentText);
+      const afterProblemHeading = problemHeading ? documentText.slice(problemHeading.index + problemHeading[0].length) : "";
+      const nextHeadingIndex = afterProblemHeading.search(/^##\s/m);
+      const problemSection = nextHeadingIndex === -1 ? afterProblemHeading : afterProblemHeading.slice(0, nextHeadingIndex);
+      const problemCount = (problemSection.match(/^❍\s*.+$/gm) || []).length;
+      const solutionPairCount = (problemSection.match(/^❍\s*.+\r?\n\s*(?:\(대응방안\)|👉)\s*.+$/gm) || []).length;
+      if (problemCount < 2 || solutionPairCount !== problemCount) {
+        review.feedback = Array.isArray(review.feedback) ? review.feedback : [];
+        review.feedback.push("예상문제점마다 바로 다음 줄에 (대응방안)을 2쌍 이상 작성");
+        review.score = Math.min(review.score, 79);
+        review.approved = false;
+      }
+      event.renderThought(renderReviewThought(text, true));
+      return review;
+    }
+
+    async function runWorkflow() {
+      const request = $("#request").value.trim();
+      if (!request) { showToast("보고서 요청을 입력해 주세요.", true); $("#request").focus(); return; }
+
+      state.controller = new AbortController();
+      state.entries = 0;
+      state.title = "";
+      state.document = "";
+      state.supplement = "";
+      state.monthlyPlan = "";
+      state.approved = false;
+      state.score = 0;
+      state.attempts = 1;
+      state.selectedReportId = null;
+      setRunning(true);
+      setConnection("busy", "모델 연결 중");
+      $("#stepBadge").textContent = "연결";
+      $("#timeline").innerHTML = '<div class="empty">로컬 모델에 연결하고 있습니다.</div>';
+      showReport("", false);
+      showSupplement("");
+      showMonthlyPlan("");
+
+      try {
+        await ensurePrompts();
+        state.model = await detectModel(state.controller.signal);
+        setConnection("ok", `연결됨 · ${state.model}`);
+        const assessment = await supervisorAssessment(request);
+        if (!assessment.suitable) throw new Error(`보고서 작성에 부적절한 요청입니다: ${assessment.reason || "사유 없음"}`);
+
+        let documentText = await writerDraft(request, assessment.writing_brief || "요청에 충실하게 작성", 0, null);
+        let review = await supervisorReview(request, documentText, 0);
+        const maxRevisions = 2;
+        let revision = 0;
+
+        while (!review.approved && revision < maxRevisions) {
+          revision += 1;
+          documentText = await writerDraft(request, "", revision, review);
+          review = await supervisorReview(request, documentText, revision);
+        }
+
+        state.approved = review.approved;
+        state.score = review.score;
+        state.attempts = revision + 1;
+        $("#stepBadge").textContent = review.approved ? `승인 · ${review.score}점` : `미승인 · ${review.score}점`;
+        await persistReport(true);
+        showToast(review.approved ? `슈퍼바이저가 ${review.score}점으로 승인했습니다.` : `최대 재작성 후에도 승인되지 않았습니다. (${review.score}점)`, !review.approved);
+      } catch (error) {
+        if (error.name === "AbortError") {
+          $("#stepBadge").textContent = "중지됨";
+          showToast("작업을 중지했습니다.");
+        } else {
+          console.error(error);
+          setConnection("error", "연결 또는 처리 오류");
+          $("#stepBadge").textContent = "오류";
+          showToast(`${error.message} — 브라우저 CORS 설정도 확인해 주세요.`, true);
+        }
+      } finally {
+        $("#reportBody").classList.remove("streaming");
+        document.querySelectorAll(".event.streaming").forEach(item => item.classList.remove("streaming"));
+        setRunning(false);
+        state.controller = null;
+      }
+    }
+
+    $("#runButton").addEventListener("click", runWorkflow);
+    $("#stopButton").addEventListener("click", () => state.controller?.abort());
+    $("#editButton").addEventListener("click", () => {
+      const showingSupplement = $("#supplementTab").getAttribute("aria-selected") === "true";
+      const showingMonthlyPlan = $("#monthlyPlanTab").getAttribute("aria-selected") === "true";
+      if (showingMonthlyPlan) setMonthlyPlanEditing(!state.monthlyPlanEditing);
+      else if (showingSupplement) setSupplementEditing(!state.supplementEditing);
+      else setEditing(!state.editing);
+    });
+    $("#saveButton").addEventListener("click", async () => {
+      const button = $("#saveButton");
+      button.disabled = true;
+      try {
+        await persistReport();
+      } catch (error) {
+        console.error(error);
+        showToast(`DB 저장 실패: ${error.message} — 저장 서버 실행 여부를 확인해 주세요.`, true);
+      } finally {
+        updateSaveButton();
+      }
+    });
+
+    $("#supplementButton").addEventListener("click", async () => {
+      if (!state.selectedReportId) {
+        showToast("먼저 보고서를 데이터베이스에 저장해 주세요.", true);
+        return;
+      }
+      if (state.supplement && !confirm("이미 작성된 보충자료가 있습니다. 재작성하면 기존 내용이 새 보충자료로 대체됩니다. 계속할까요?")) {
+        return;
+      }
+      const button = $("#supplementButton");
+      button.disabled = true;
+      const previousSupplement = state.supplement;
+      state.supplementWriting = true;
+      state.controller = new AbortController();
+      const event = addEvent("writer", "선택한 보고서를 바탕으로 직무 리스킬 보충자료를 작성합니다.", { mirrorContent: false });
+      try {
+        if (!state.model) state.model = await detectModel(state.controller.signal);
+        const prompt = `다음 기존 보고서를 초보 실무자가 이해하고 업무에 적용할 수 있는 상세 직무 리스킬 학습 가이드로 작성하십시오. 보고서에 없는 기관별 사실은 만들지 말고, 필요한 기술과 도구 활용은 일반적인 방법과 선택 기준으로 충분히 설명하십시오.\n\n[보고서 제목]\n${state.title}\n\n[원 요청]\n${$("#request").value.trim()}\n\n[보고서 본문]\n${state.document}`;
+        selectDocumentView("supplement");
+        showSupplement("", true);
+        await ensurePrompts();
+        const content = await streamChat(getPrompt("supplement_generation"), prompt, 0.35, event, text => showSupplement(text, true));
+        showSupplement(content);
+        const response = await fetch(`${REPORT_STORAGE_URL}/${state.selectedReportId}/supplement`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content })
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || `저장 실패 (${response.status})`);
+        showSupplement(result.content);
+        showToast("직무 리스킬 보충자료를 보고서와 연계해 저장했습니다.");
+      } catch (error) {
+        console.error(error);
+        showSupplement(previousSupplement);
+        showToast(`보충자료 작성 실패: ${error.message}`, true);
+      } finally {
+        event.done();
+        state.supplementWriting = false;
+        state.controller = null;
+        updateSaveButton();
+      }
+    });
+
+    $("#monthlyPlanButton").addEventListener("click", async () => {
+      if (!state.selectedReportId || !state.supplement) {
+        showToast("보고서와 보충자료를 모두 준비한 뒤 생성할 수 있습니다.", true);
+        return;
+      }
+      if (state.monthlyPlan && !confirm("이미 작성된 월간업무계획이 있습니다. 재생성하면 기존 계획이 새 계획으로 대체됩니다. 계속할까요?")) return;
+      state.monthlyPlanWriting = true;
+      state.controller = new AbortController();
+      const previousPlan = state.monthlyPlan;
+      const event = addEvent("writer", "보고서와 보충자료를 바탕으로 1월부터 12월까지의 월간업무계획을 작성합니다.", { mirrorContent: false });
+      try {
+        if (!state.model) state.model = await detectModel(state.controller.signal);
+        const prompt = `다음 보고서와 직무 리스킬 보충자료를 모두 반영하여 월간업무계획을 작성하십시오.\n\n[보고서 제목]\n${state.title}\n\n[보고서 본문]\n${state.document}\n\n[직무 리스킬 보충자료]\n${state.supplement}`;
+        selectDocumentView("monthly-plan");
+        showMonthlyPlan("", true);
+        await ensurePrompts();
+        const content = await streamChat(getPrompt("monthly_plan_generation"), prompt, 0.3, event, text => showMonthlyPlan(text, true));
+        showMonthlyPlan(content);
+        const response = await fetch(`${REPORT_STORAGE_URL}/${state.selectedReportId}/monthly-plan`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content })
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || `저장 실패 (${response.status})`);
+        showMonthlyPlan(result.content);
+        showToast("월간업무계획을 기존 보고서와 연계해 저장했습니다.");
+      } catch (error) {
+        console.error(error);
+        showMonthlyPlan(previousPlan);
+        showToast(`월간업무계획 작성 실패: ${error.message}`, true);
+      } finally {
+        event.done();
+        state.monthlyPlanWriting = false;
+        state.controller = null;
+        updateSaveButton();
+      }
+    });
+
+          $("#promptSelect").addEventListener("change", showSelectedPrompt);
+          $("#savePromptButton").addEventListener("click", async () => {
+            const name = $("#promptSelect").value;
+            const content = $("#promptEditor").value;
+            const button = $("#savePromptButton");
+            button.disabled = true;
+            try {
+              const response = await fetch(`${PROMPT_URL}/${name}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ content })
+              });
+              const result = await response.json();
+              if (!response.ok) throw new Error(result.error || `저장 실패 (${response.status})`);
+              state.prompts[name] = result.content;
+              showSelectedPrompt();
+              showToast("프롬프트를 저장했습니다. 다음 생성부터 적용됩니다.");
+            } catch (error) {
+              showToast(`프롬프트 저장 실패: ${error.message}`, true);
+            } finally {
+              button.disabled = !state.prompts;
+            }
+          });
+    $("#reportTab").addEventListener("click", () => selectDocumentView("report"));
+    $("#supplementTab").addEventListener("click", () => selectDocumentView("supplement"));
+    $("#monthlyPlanTab").addEventListener("click", () => selectDocumentView("monthly-plan"));
+
+    $("#savedReports").addEventListener("click", event => {
+      const deleteButton = event.target.closest("[data-delete-report-id]");
+      if (deleteButton) deleteSavedReport(Number(deleteButton.dataset.deleteReportId));
+      const openButton = event.target.closest("[data-report-id]");
+      if (openButton) openSavedReport(Number(openButton.dataset.reportId));
+    });
+
+    async function checkConnectionOnLoad() {
+      setConnection("busy", "서버 확인 중");
+      try {
+        const model = await detectModel();
+        setConnection("ok", `연결됨 · ${model}`);
+      } catch (error) {
+        console.error(error);
+        setConnection("error", "서버 연결 실패");
+      }
+    }
+
+    async function startApplication(username) {
+      $("#accountName").textContent = username;
+      $("#loginOverlay").hidden = true;
+      checkConnectionOnLoad();
+      state.promptLoadPromise = loadPrompts().catch(error => {
+        console.error(error);
+        showToast(`프롬프트 로드 실패: ${error.message}`, true);
+        throw error;
+      });
+      loadSavedReports(true);
+    }
+
+    $("#loginForm").addEventListener("submit", async event => {
+      event.preventDefault();
+      const button = $("#loginButton");
+      const errorMessage = $("#loginError");
+      button.disabled = true;
+      errorMessage.textContent = "";
+      try {
+        const response = await fetch(`${AUTH_URL}/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: $("#loginUsername").value, password: $("#loginPassword").value })
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || "로그인에 실패했습니다.");
+        $("#loginPassword").value = "";
+        await startApplication(result.username);
+      } catch (error) {
+        errorMessage.textContent = error.message;
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+    $("#logoutButton").addEventListener("click", async () => {
+      await fetch(`${AUTH_URL}/logout`, { method: "POST" });
+      state.selectedReportId = null;
+      state.prompts = null;
+      state.promptLoadPromise = null;
+      $("#loginOverlay").hidden = false;
+      $("#loginUsername").focus();
+    });
+
+    (async () => {
+      try {
+        const response = await fetch(`${AUTH_URL}/me`);
+        if (!response.ok) return;
+        const result = await response.json();
+        await startApplication(result.username);
+      } catch (error) {
+        console.error(error);
+      }
+    })();
+  </script>
+</body>
+</html>

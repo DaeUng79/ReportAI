@@ -1,0 +1,5 @@
+# This project uses only Python standard-library modules.
+#
+# External runtime prerequisite:
+# - llama-server must be installed separately and running on http://127.0.0.1:8080/v1.
+# - Start report_storage_server.py and open its local URL in a browser.

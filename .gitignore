@@ -1,0 +1,11 @@
+# 가상환경 무시
+.venv/
+.temp_template
+
+# 파이썬 캐시 무시
+__pycache__/
+
+# (선택) 운영체제 임시 파일 무시
+.DS_Store
+Thumbs.db
+*.mp4
