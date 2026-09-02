@@ -9,13 +9,15 @@
 
 **ReportAI는 지방정부의** 반복되는 보고 업무를 지원하는 온프레미스 기반**의 에이전트(Agent)형 AX 서비스입니다.**
 
-![Document Authoring Agent Flow](<image/README/Document%20Authoring%20Agent%20Flow.gif>)
-
 단순히 문서를 자동 생성하는 도구를 넘어, 실무 현장의 불필요한 보고 프로세스를 줄이는 **업무 간소화**와 실무자의 보고·기획 역량을 높이는 **직무 리스킬링(Re-Skilling)**을 함께 목표로 합니다.
+
+[![ReportAI 미리보기](<image/README/Document%20Authoring%20Agent%20Flow.gif>)](https://daeung79.github.io/ReportAI/)
 
 생성된 보고서와 보충자료, 월간업무계획은 ReportAI 웹/API 서버의 데이터베이스에 사용자별로 분리 저장합니다.
 
 조직의 내부망에서 운영하는 로컬 LLM을 연결하므로, **내부정보**는 물론 기관의 작성 스타일을 외부 생성형 AI 서비스에 전달하지 않고도 개인별 업무역량을 AI로 강화할 수 있습니다.
+
+[ReportAI 소개페이지](https://daeung79.github.io/ReportAI/)
 
 ## 지방정부 ReportAI가 안내하는 AX 전환 목표
 
