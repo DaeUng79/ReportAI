@@ -9,7 +9,7 @@
 
 **ReportAI는 지방정부의** 반복되는 보고 업무를 지원하는 온프레미스 기반**의 에이전트(Agent)형 AX 서비스입니다.**
 
-![Document Authoring Agent Flow](<docs/images/Document%20Authoring%20Agent%20Flow.gif>)
+![Document Authoring Agent Flow](<image/README/Document%20Authoring%20Agent%20Flow.gif>)
 
 단순히 문서를 자동 생성하는 도구를 넘어, 실무 현장의 불필요한 보고 프로세스를 줄이는 **업무 간소화**와 실무자의 보고·기획 역량을 높이는 **직무 리스킬링(Re-Skilling)**을 함께 목표로 합니다.
 
@@ -64,19 +64,19 @@ flowchart LR
 
 저장된 보고서를 바탕으로 신규 실무자가 업무를 이해하고 적용할 수 있는 직무 리스킬 학습 가이드를 생성합니다. 보고서 보기 영역의 **보충자료 생성**을 선택하면 핵심 용어, 기술 습득 로드맵, 실무 적용 절차, 실습 과제와 점검표를 확인할 수 있습니다.
 
-![보고서 기반 직무 리스킬 생성 및 확인](docs/images/Re-skilling.gif)
+![보고서 기반 직무 리스킬 생성 및 확인](image/README/Re-skilling.gif)
 
 ### 프로젝트 실행을 위한 월별 추진계획
 
 보고서와 직무 리스킬 보충자료를 바탕으로 1월부터 12월까지의 월별 추진계획을 생성합니다. **월간계획 생성**을 선택하면 준비, 실행, 점검, 협업 또는 학습 활동을 월별로 확인하고 수정할 수 있습니다.
 
-![프로젝트 실행을 위한 월별 추진계획](<docs/images/Monthly%20Schedule.gif>)
+![프로젝트 실행을 위한 월별 추진계획](<image/README/Monthly%20Schedule.gif>)
 
 ### 리포트 수정
 
 생성된 보고서는 **수정** 기능으로 제목, 구분, 소관과 본문을 직접 보완할 수 있습니다. 수정 완료 후 **DB 업데이트**를 선택하면 로그인한 사용자의 저장 보고서에 변경 내용이 반영됩니다.
 
-![리포트 수정](<docs/images/Revise%20Report.gif>)
+![리포트 수정](<image/README/Revise%20Report.gif>)
 
 ## 사전 준비
 
