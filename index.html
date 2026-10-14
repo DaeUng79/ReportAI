@@ -14,7 +14,68 @@
     .reskill{display:grid;grid-template-columns:.9fr 1.1fr;gap:3vw;align-items:center;flex:1;position:relative;z-index:1}.reskill-copy{padding:2vw}.reskill-copy h3{font-size:clamp(31px,3.3vw,55px);line-height:1.2;letter-spacing:-.04em;margin:0 0 18px}.reskill-copy p{color:var(--muted);font-size:clamp(17px,1.35vw,23px);line-height:1.6}.learning{display:grid;gap:10px;margin-top:20px}.learning span{padding:13px 15px;border-left:5px solid var(--gold);background:#fff;font-size:clamp(15px,1.1vw,19px);font-weight:800}.plan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}.plan-box{min-height:130px;padding:16px;border:1px solid var(--line);border-radius:8px;background:#fff}.plan-box b{display:block;margin-bottom:7px;color:var(--green);font-size:13px;letter-spacing:.08em}.plan-box span{font-size:clamp(15px,1.12vw,19px);font-weight:800;line-height:1.4}.plan-note{margin-top:16px;padding:13px 16px;border-radius:8px;background:#eaf6f0;color:var(--green);font-size:clamp(15px,1.1vw,19px);font-weight:850}
     .trust-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.trust{min-height:280px;padding:25px 22px;border:1px solid var(--line);border-radius:10px;background:#fff;box-shadow:0 10px 24px rgba(18,51,43,.06)}.trust b{display:grid;place-items:center;width:48px;height:48px;border-radius:10px;background:#e8f5ee;color:var(--green);font-size:22px}.trust h3{margin:17px 0 8px;font-size:clamp(21px,1.6vw,27px)}.trust p{margin:0;color:var(--muted);font-size:clamp(14px,1.05vw,18px);line-height:1.55}.closing .title{font-size:clamp(47px,5.7vw,78px)}.takeaway{display:inline-block;margin-top:2rem;padding:17px 23px;border-left:7px solid var(--gold);background:#fff;font-size:clamp(20px,1.7vw,29px);font-weight:900}.source{position:absolute;z-index:2;left:7vw;bottom:2.3vh;color:#7f9188;font-size:11px}
     .controls{position:fixed;z-index:10;right:22px;bottom:18px;display:flex;gap:8px;align-items:center}.control{display:grid;place-items:center;width:43px;height:43px;border:0;border-radius:50%;background:rgba(18,51,43,.92);color:#fff;box-shadow:0 7px 20px rgba(0,0,0,.25);cursor:pointer;font-size:22px}.control:hover{background:var(--green)}.count{min-width:54px;color:#fff;text-align:center;font-size:14px;font-weight:800}.progress{position:fixed;z-index:11;bottom:0;left:0;height:5px;background:var(--gold);transition:width .3s}.notes{display:none;position:fixed;z-index:12;right:18px;bottom:74px;max-width:min(650px,calc(100vw - 36px));padding:18px 21px;border-radius:10px;background:rgba(18,51,43,.96);color:#fff;box-shadow:var(--shadow);font-size:15px;line-height:1.65}.notes.open{display:block}.keyhint{position:fixed;z-index:10;left:22px;bottom:18px;color:rgba(255,255,255,.76);font-size:12px}
-    @media(min-width:901px) and (max-width:1280px){.slide{padding:5.5vh 5vw 7vh}.title{font-size:clamp(32px,3.8vw,50px)}.hero .title{font-size:clamp(48px,5.5vw,70px)}.closing .title{font-size:clamp(42px,4.8vw,62px)}}@media(max-width:900px){.slide{padding:5vh 6vw 9vh}.two,.reskill{grid-template-columns:1fr}.stage,.reskill{overflow:auto}.flow{grid-template-columns:1fr}.arrow{transform:rotate(90deg);height:35px}.node{min-height:0}.trust-grid,.plan-grid{grid-template-columns:1fr}.trust{min-height:0}.keyhint{display:none}}@media print{html,body{height:auto;overflow:visible;background:#fff}.deck{height:auto}.slide{display:flex!important;position:relative;width:13.333in;height:7.5in;page-break-after:always;padding:.55in .75in;animation:none}.controls,.progress,.notes,.keyhint{display:none!important}.source{left:.75in;bottom:.2in}}
+    @media(min-width:901px) and (max-width:1280px){.slide{padding:5.5vh 5vw 7vh}.title{font-size:clamp(32px,3.8vw,50px)}.hero .title{font-size:clamp(48px,5.5vw,70px)}.closing .title{font-size:clamp(42px,4.8vw,62px)}}@media(max-width:900px){.slide{padding:5vh 6vw 9vh}.two,.reskill{grid-template-columns:1fr}.stage,.reskill{overflow:auto}.flow{grid-template-columns:1fr}.arrow{transform:rotate(90deg);height:35px}.node{min-height:0}.trust-grid,.plan-grid{grid-template-columns:1fr}.trust{min-height:0}.keyhint{display:none}}
+    @media(max-width:700px){
+      html,body{height:auto;min-height:100%;padding-bottom:62px;overflow-x:hidden;overflow-y:auto;background:var(--paper)}
+      .deck{height:auto;position:static}
+      .slide,.slide.active{display:flex!important;position:relative;inset:auto;width:100%;height:auto;min-height:0;overflow:visible;padding:34px 22px 38px;animation:none;border-bottom:1px solid var(--line)}
+      .slide:before,.slide:after{display:none}
+      .kicker{font-size:12px;letter-spacing:.1em}
+      .title{font-size:clamp(29px,8vw,38px);line-height:1.24;margin:9px 0 20px;letter-spacing:-.045em}
+      .subtitle{font-size:17px;line-height:1.65}
+      .hero{align-items:flex-start;text-align:left;background:linear-gradient(150deg,#f9fbf8,#e8f4ee)}
+      .hero .title,.closing .title{font-size:clamp(38px,10vw,48px);margin:10px 0 16px}
+      .agency{margin:0 0 18px;padding:8px 12px;font-size:12px;line-height:1.4}
+      .agency i{flex:0 0 8px;width:8px;height:8px}
+      .hero-line{margin:22px 0 0;padding-top:16px;font-size:20px;line-height:1.5}
+      .axis{justify-content:flex-start;gap:8px;margin-top:16px}
+      .axis span{padding:9px 12px;font-size:13px}
+      .stage,.reskill{display:grid;grid-template-columns:1fr;gap:20px;flex:none;min-height:0;overflow:visible;align-items:stretch}
+      .pain-quote{padding:19px 18px;border-left-width:5px;font-size:25px;line-height:1.42}
+      .persona{font-size:14px;line-height:1.5}
+      .problem-stack{gap:9px}
+      .problem{grid-template-columns:38px 1fr;gap:11px;padding:14px 13px}
+      .problem b{width:34px;height:34px;font-size:13px}
+      .problem strong{font-size:16px;line-height:1.4}
+      .problem p{font-size:14px;line-height:1.55}
+      .flow{grid-template-columns:1fr;gap:8px}
+      .node{padding:18px 16px;text-align:left}
+      .node h3{margin:9px 0 5px;font-size:19px}
+      .node p{font-size:14px;line-height:1.55}
+      .arrow{height:22px;font-size:24px;line-height:22px;transform:rotate(90deg)}
+      .flow-caption{margin:5px 0 0;text-align:left;font-size:17px;line-height:1.55}
+      .media{aspect-ratio:4/3}
+      .media-caption{font-size:12px;line-height:1.5}
+      .callout{padding:20px}
+      .callout h3{margin-bottom:9px;font-size:23px}
+      .callout p{font-size:15px;line-height:1.65}
+      .checklist{gap:8px;margin-top:14px}
+      .checklist div{padding:11px 12px;font-size:14px;line-height:1.45}
+      .reskill-copy{padding:0}
+      .reskill-copy h3{margin:0 0 10px;font-size:29px}
+      .reskill-copy p{margin:0;font-size:15px;line-height:1.65}
+      .learning{gap:8px;margin-top:14px}
+      .learning span{padding:11px 12px;font-size:14px;line-height:1.45}
+      .plan-grid{grid-template-columns:1fr;gap:8px}
+      .plan-box{min-height:0;padding:13px 15px}
+      .plan-box b{margin-bottom:4px;font-size:11px}
+      .plan-box span{font-size:15px}
+      .plan-note{margin-top:10px;padding:12px 14px;font-size:14px;line-height:1.5}
+      .trust-grid{grid-template-columns:1fr;gap:10px}
+      .trust{min-height:0;padding:18px}
+      .trust b{width:38px;height:38px;font-size:17px}
+      .trust h3{margin:12px 0 5px;font-size:19px}
+      .trust p{font-size:14px;line-height:1.6}
+      .closing{background:linear-gradient(150deg,#f9fbf8,#e8f4ee)}
+      .takeaway{margin-top:18px;padding:13px 15px;border-left-width:5px;font-size:16px;line-height:1.5}
+      .source{position:static;margin-top:18px;font-size:10px}
+      .controls{right:12px;bottom:12px;gap:5px;padding:5px;border-radius:999px;background:rgba(18,51,43,.12);backdrop-filter:blur(8px)}
+      .control{width:38px;height:38px;font-size:19px}
+      .count{min-width:48px;color:var(--ink);font-size:12px}
+      .progress{top:0;bottom:auto;height:3px}
+      .keyhint,.notes{display:none!important}
+    }
+    @media print{html,body{height:auto;overflow:visible;background:#fff}.deck{height:auto}.slide{display:flex!important;position:relative;width:13.333in;height:7.5in;page-break-after:always;padding:.55in .75in;animation:none}.controls,.progress,.notes,.keyhint{display:none!important}.source{left:.75in;bottom:.2in}}
   </style>
 </head>
 <body>
@@ -64,10 +125,13 @@
   <div class="notes" id="notes"></div><div class="keyhint">← → 이동 · N 발표자 노트 · F 전체화면 · P 인쇄</div><div class="controls"><button class="control" id="prev" aria-label="이전 슬라이드">‹</button><span class="count" id="count"></span><button class="control" id="next" aria-label="다음 슬라이드">›</button></div><div class="progress" id="progress"></div>
   <script>
     const slides=[...document.querySelectorAll('.slide')];let current=0;const notes=document.querySelector('#notes');
-    function show(index){current=(index+slides.length)%slides.length;slides.forEach((slide,position)=>slide.classList.toggle('active',position===current));document.querySelector('#count').textContent=`${current+1} / ${slides.length}`;document.querySelector('#progress').style.width=`${((current+1)/slides.length)*100}%`;notes.innerHTML=slides[current].dataset.notes||''}
+    const mobileView=window.matchMedia('(max-width: 700px)');
+    function update(index){current=index;slides.forEach((slide,position)=>slide.classList.toggle('active',position===current));document.querySelector('#count').textContent=`${current+1} / ${slides.length}`;document.querySelector('#progress').style.width=`${((current+1)/slides.length)*100}%`;notes.innerHTML=slides[current].dataset.notes||''}
+    function show(index){const target=(index+slides.length)%slides.length;update(target);if(mobileView.matches)slides[target].scrollIntoView({behavior:'smooth',block:'start'})}
+    if('IntersectionObserver' in window){const observer=new IntersectionObserver(entries=>{if(!mobileView.matches)return;const visible=entries.filter(entry=>entry.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];if(visible)update(slides.indexOf(visible.target))},{threshold:[.2,.45,.7]});slides.forEach(slide=>observer.observe(slide))}
     document.querySelector('#prev').addEventListener('click',()=>show(current-1));document.querySelector('#next').addEventListener('click',()=>show(current+1));
     document.addEventListener('keydown',event=>{if(['ArrowRight',' ','PageDown'].includes(event.key)){event.preventDefault();show(current+1)}if(['ArrowLeft','PageUp'].includes(event.key)){event.preventDefault();show(current-1)}if(event.key==='Home')show(0);if(event.key==='End')show(slides.length-1);if(event.key.toLowerCase()==='n')notes.classList.toggle('open');if(event.key.toLowerCase()==='f'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}if(event.key.toLowerCase()==='p')window.print()});
-    let startX=0;document.addEventListener('touchstart',event=>startX=event.changedTouches[0].screenX,{passive:true});document.addEventListener('touchend',event=>{const distance=event.changedTouches[0].screenX-startX;if(Math.abs(distance)>45)show(current+(distance<0?1:-1))},{passive:true});show(0);
+    let startX=0,startY=0;document.addEventListener('touchstart',event=>{startX=event.changedTouches[0].screenX;startY=event.changedTouches[0].screenY},{passive:true});document.addEventListener('touchend',event=>{if(mobileView.matches)return;const dx=event.changedTouches[0].screenX-startX,dy=event.changedTouches[0].screenY-startY;if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy))show(current+(dx<0?1:-1))},{passive:true});show(0);
   </script>
 </body>
 </html>
